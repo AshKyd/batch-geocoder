@@ -16,33 +16,47 @@ function initialize() {
 		var q = async.queue(function (task, callback) {
 			console.log('geocoding',task.addr);
 			codeAddress(task.addr,function(result){
-				text[task.i] = text[task.i] + '\t' + result.lat() + '\t'+result.lng();
+				if(result){
+					text[task.i] = text[task.i] + '\t' + result.lat() + '\t'+result.lng();
+				}
+				document.querySelector('textarea').value = text.join("\n");
 				callback();
-			});
+			},true);
 		}, 2);
 
 		text.forEach(function(addr,i){
 			q.push({i: i,addr:addr}, function (err) {
 			    if(q.length() == 0){
-			    	document.querySelector('textarea').value = text.join("\n");
+			    	console.log('Completed all')
 			    }
 			});
 		});
 	}
 }
 
-function codeAddress(address,callback) {
+function codeAddress(address,callback,retry) {
 	geocoder.geocode( { 'address': address}, function(results, status) {
 		if (status == google.maps.GeocoderStatus.OK) {
-			map.setCenter(results[0].geometry.location);
 			var marker = new google.maps.Marker({
 					map: map,
 					position: results[0].geometry.location
 			});
-			callback(results[0].geometry.location);
+			window.setTimeout(function(){
+				callback(results[0].geometry.location);
+			},Math.random()*1000);
 		} else {
 			console.log("Geocode was not successful for the following reason: " + status);
-			callback(false);
+			if(retry){
+				console.log('Retrying '+address);
+				window.setTimeout(function(){
+					codeAddress(address,callback,false);
+				},5000);
+			} else {
+				console.log('Not retrying'+address);
+				window.setTimeout(function(){
+					callback(false);
+				},5000);
+			}
 		}
 	});
 }
