@@ -3,8 +3,8 @@ var map;
 function initialize() {
 	geocoder = new google.maps.Geocoder();
 	var mapOptions = {
-		zoom: 8,
-		center: google.maps.LatLng(-34.397, 150.644)
+		zoom: 4,
+		center: new google.maps.LatLng(-25.52, 136.93)
 	}
 	map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
@@ -39,11 +39,12 @@ function codeAddress(address,callback,retry) {
 		if (status == google.maps.GeocoderStatus.OK) {
 			var marker = new google.maps.Marker({
 					map: map,
+					title: address,
 					position: results[0].geometry.location
 			});
 			window.setTimeout(function(){
 				callback(results[0].geometry.location);
-			},Math.random()*1000);
+			},Math.random()*2000);
 		} else {
 			console.log("Geocode was not successful for the following reason: " + status);
 			if(retry){
